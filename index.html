@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <!--
 Copyright 2018 The Immersive Web Community Group
 
@@ -21,13 +21,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
   <head>
-    <meta charset='utf-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'>
-    <meta name='mobile-web-app-capable' content='yes'>
-    <meta name='apple-mobile-web-app-capable' content='yes'>
-    <link rel='icon' type='image/png' sizes='32x32' href='favicon-32x32.png'>
-    <link rel='icon' type='image/png' sizes='96x96' href='favicon-96x96.png'>
-    <link rel='stylesheet' href='css/common.css'>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=no"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png" />
+    <link rel="stylesheet" href="css/common.css" />
 
     <title>Hit Test</title>
   </head>
@@ -36,20 +39,24 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       <details open>
         <summary>Hit Test</summary>
         <p>
-          This sample demonstrates the use of hit testing to place virtual objects on real-world surfaces.
+          This sample demonstrates the use of hit testing to place virtual
+          objects on real-world surfaces.
           <a class="back" href="./">Back</a>
         </p>
       </details>
     </header>
     <script type="module">
-      import {WebXRButton} from './js/util/webxr-button.js';
-      import {Scene} from './js/render/scenes/scene.js';
-      import {Renderer, createWebGLContext} from './js/render/core/renderer.js';
-      import {Node} from './js/render/core/node.js';
-      import {Gltf2Node} from './js/render/nodes/gltf2.js';
-      import {DropShadowNode} from './js/render/nodes/drop-shadow.js';
-      import {vec3} from './js/render/math/gl-matrix.js';
-      import {Ray} from './js/render/math/ray.js';
+      import { WebXRButton } from "./js/util/webxr-button.js";
+      import { Scene } from "./js/render/scenes/scene.js";
+      import {
+        Renderer,
+        createWebGLContext,
+      } from "./js/render/core/renderer.js";
+      import { Node } from "./js/render/core/node.js";
+      import { Gltf2Node } from "./js/render/nodes/gltf2.js";
+      import { DropShadowNode } from "./js/render/nodes/drop-shadow.js";
+      import { vec3 } from "./js/render/math/gl-matrix.js";
+      import { Ray } from "./js/render/math/ray.js";
 
       // XR globals.
       let xrButton = null;
@@ -67,10 +74,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       arObject.visible = false;
       scene.addNode(arObject);
 
-      let flower = new Gltf2Node({url: 'media/gltf/sunflower/sunflower.gltf'});
+      let flower = new Gltf2Node({
+        url: "media/gltf/witch_house/witch_house.gltf",
+      });
       arObject.addNode(flower);
 
-      let reticle = new Gltf2Node({url: 'media/gltf/reticle/reticle.gltf'});
+      let reticle = new Gltf2Node({ url: "media/gltf/reticle/reticle.gltf" });
       reticle.visible = false;
       scene.addNode(reticle);
 
@@ -94,31 +103,33 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           textXRNotFoundTitle: "AR NOT FOUND",
           textExitXRTitle: "EXIT  AR",
         });
-        document.querySelector('header').appendChild(xrButton.domElement);
+        document.querySelector("header").appendChild(xrButton.domElement);
 
         if (navigator.xr) {
-          navigator.xr.isSessionSupported('immersive-ar')
-                      .then((supported) => {
+          navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
             xrButton.enabled = supported;
           });
         }
       }
 
       function onRequestSession() {
-        return navigator.xr.requestSession('immersive-ar', {requiredFeatures: ['local', 'hit-test']})
-                           .then((session) => {
-          xrButton.setSession(session);
-          onSessionStarted(session);
-        });
+        return navigator.xr
+          .requestSession("immersive-ar", {
+            requiredFeatures: ["local", "hit-test"],
+          })
+          .then((session) => {
+            xrButton.setSession(session);
+            onSessionStarted(session);
+          });
       }
 
       function onSessionStarted(session) {
-        session.addEventListener('end', onSessionEnded);
-        session.addEventListener('select', onSelect);
+        session.addEventListener("end", onSessionEnded);
+        session.addEventListener("select", onSelect);
 
         if (!gl) {
           gl = createWebGLContext({
-            xrCompatible: true
+            xrCompatible: true,
           });
 
           renderer = new Renderer(gl);
@@ -132,14 +143,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // position and render a reticle where it intersects with a real world
         // surface. To do this we first get the viewer space, then create a
         // hitTestSource that tracks it.
-        session.requestReferenceSpace('viewer').then((refSpace) => {
+        session.requestReferenceSpace("viewer").then((refSpace) => {
           xrViewerSpace = refSpace;
-          session.requestHitTestSource({ space: xrViewerSpace }).then((hitTestSource) => {
-            xrHitTestSource = hitTestSource;
-          });
+          session
+            .requestHitTestSource({ space: xrViewerSpace })
+            .then((hitTestSource) => {
+              xrHitTestSource = hitTestSource;
+            });
         });
 
-        session.requestReferenceSpace('local').then((refSpace) => {
+        session.requestReferenceSpace("local").then((refSpace) => {
           xrRefSpace = refSpace;
 
           session.requestAnimationFrame(onXRFrame);
@@ -179,8 +192,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       let rayDirection = vec3.create();
       function onSelect(event) {
         if (reticle.visible) {
-          // The reticle should already be positioned at the latest hit point, 
-          // so we can just use it's matrix to save an unnecessary call to 
+          // The reticle should already be positioned at the latest hit point,
+          // so we can just use it's matrix to save an unnecessary call to
           // event.frame.getHitTestResults.
           addARObjectAt(reticle.matrix);
         }
